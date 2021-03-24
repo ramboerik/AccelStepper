@@ -673,10 +673,10 @@ private:
     uint8_t        _enablePin;
 
     /// Forward-step procedure
-    std::function<void>() _forward;
+    std::function<void()> _forward;
 
     /// Backward-step procedure
-    std::function<void>() _backward;
+    std::function<void()> _backward;
 
     /// The step counter for speed calculations
     long _n;
