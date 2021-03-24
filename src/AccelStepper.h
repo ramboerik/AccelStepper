@@ -380,8 +380,8 @@ public:
     /// Any motor initialization should happen before hand, no pins are used or initialized.
     /// \param[in] forward void-returning procedure that will make a forward step
     /// \param[in] backward void-returning procedure that will make a backward step
-    AccelStepper(void (*forward)(), void (*backward)());
-    
+    AccelStepper(const std::function<void>() &forward, const std::function<void>() &backward);
+
     /// Set the target position. The run() function will try to move the motor (at most one step per call)
     /// from the current position to the target position set by the most
     /// recent call to this function. Caution: moveTo() also recalculates the speed for the next step. 
@@ -672,11 +672,11 @@ private:
     /// Enable pin for stepper driver, or 0xFF if unused.
     uint8_t        _enablePin;
 
-    /// The pointer to a forward-step procedure
-    void (*_forward)();
+    /// Forward-step procedure
+    std::function<void>() _forward;
 
-    /// The pointer to a backward-step procedure
-    void (*_backward)();
+    /// Backward-step procedure
+    std::function<void>() _backward;
 
     /// The step counter for speed calculations
     long _n;

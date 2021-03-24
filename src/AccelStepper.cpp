@@ -222,7 +222,7 @@ AccelStepper::AccelStepper(uint8_t interface, uint8_t pin1, uint8_t pin2, uint8_
     setAcceleration(1);
 }
 
-AccelStepper::AccelStepper(void (*forward)(), void (*backward)())
+AccelStepper::AccelStepper(const std::function<void>() &forward, const std::function<void>() &backward)
 {
     _interface = 0;
     _currentPos = 0;
