@@ -258,6 +258,7 @@
 #define AccelStepper_h
 
 #include <stdlib.h>
+#include <functional>
 #if ARDUINO >= 100
 #include <Arduino.h>
 #else
@@ -380,7 +381,7 @@ public:
     /// Any motor initialization should happen before hand, no pins are used or initialized.
     /// \param[in] forward void-returning procedure that will make a forward step
     /// \param[in] backward void-returning procedure that will make a backward step
-    AccelStepper(const std::function<void>() &forward, const std::function<void>() &backward);
+    AccelStepper(const std::function<void()> &forward, const std::function<void()> &backward);
 
     /// Set the target position. The run() function will try to move the motor (at most one step per call)
     /// from the current position to the target position set by the most
