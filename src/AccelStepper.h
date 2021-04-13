@@ -337,8 +337,13 @@ public:
 	FULL3WIRE = 3, ///< 3 wire stepper, such as HDD spindle, 3 motor pins required
         FULL4WIRE = 4, ///< 4 wire full stepper, 4 motor pins required
 	HALF3WIRE = 6, ///< 3 wire half stepper, such as HDD spindle, 3 motor pins required
-	HALF4WIRE = 8  ///< 4 wire half stepper, 4 motor pins required
+	HALF4WIRE = 8,  ///< 4 wire half stepper, 4 motor pins required
+    NOT_INITIALIZED = 255,
     } MotorInterfaceType;
+
+
+    // Allow stepper to be initialized later with setMode().
+    AccelStepper();
 
     /// Constructor. You can have multiple simultaneous steppers, all moving
     /// at different speeds and accelerations, provided you call their run()
@@ -371,9 +376,9 @@ public:
     /// to pin 5.
     /// \param[in] enable If this is true (the default), enableOutputs() will be called to enable
     /// the output pins at construction time.
-    AccelStepper(uint8_t interface = AccelStepper::FULL4WIRE, uint8_t pin1 = 2, uint8_t pin2 = 3, uint8_t pin3 = 4, uint8_t pin4 = 5, bool enable = true);
+    AccelStepper(uint8_t interface, uint8_t pin1 = 2, uint8_t pin2 = 3, uint8_t pin3 = 4, uint8_t pin4 = 5, bool enable = true);
 
-    /// Alternate Constructor which will call your own functions for forward and backward steps. 
+    /// Alternate Constructor which will call your own functions for forward and backward steps.
     /// You can have multiple simultaneous steppers, all moving
     /// at different speeds and accelerations, provided you call their run()
     /// functions at frequent enough intervals. Current Position is set to 0, target
@@ -409,6 +414,10 @@ public:
     /// frequently as possible, but at least once per step interval,
     /// \return true if the motor was stepped.
     boolean runSpeed();
+
+    // Change stepper operating mode.
+    void    setMode(const std::function<void()> &forward, const std::function<void()> &backward);
+    void    setMode(uint8_t interface, uint8_t pin1 = 2, uint8_t pin2 = 3, uint8_t pin3 = 4, uint8_t pin4 = 5, bool enable = true);
 
     /// Sets the maximum permitted speed. The run() function will accelerate
     /// up to the speed set by this function.

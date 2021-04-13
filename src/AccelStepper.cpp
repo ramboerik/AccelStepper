@@ -183,11 +183,26 @@ void AccelStepper::computeNewSpeed()
 boolean AccelStepper::run()
 {
     if (runSpeed())
-	computeNewSpeed();
+	    computeNewSpeed();
     return _speed != 0.0 || distanceToGo() != 0;
 }
 
+AccelStepper::AccelStepper()
+{
+    _interface = NOT_INITIALIZED;
+}
+
 AccelStepper::AccelStepper(uint8_t interface, uint8_t pin1, uint8_t pin2, uint8_t pin3, uint8_t pin4, bool enable)
+{
+    setMode(interface, pin1, pin2, pin3, pin4, enable);
+}
+
+AccelStepper::AccelStepper(const std::function<void()> &forward, const std::function<void()> &backward)
+{
+    setMode(forward, backward);
+}
+
+void AccelStepper::setMode(uint8_t interface, uint8_t pin1, uint8_t pin2, uint8_t pin3, uint8_t pin4, bool enable)
 {
     _interface = interface;
     _currentPos = 0;
@@ -222,7 +237,7 @@ AccelStepper::AccelStepper(uint8_t interface, uint8_t pin1, uint8_t pin2, uint8_
     setAcceleration(1);
 }
 
-AccelStepper::AccelStepper(const std::function<void()> &forward, const std::function<void()> &backward)
+void AccelStepper::setMode(const std::function<void()> &forward, const std::function<void()> &backward)
 {
     _interface = 0;
     _currentPos = 0;
@@ -280,8 +295,7 @@ float   AccelStepper::maxSpeed()
 
 void AccelStepper::setAcceleration(float acceleration)
 {
-    if (acceleration == 0.0)
-	return;
+    if (acceleration == 0.0) return;
     if (acceleration < 0.0)
       acceleration = -acceleration;
     if (_acceleration != acceleration)
@@ -297,8 +311,7 @@ void AccelStepper::setAcceleration(float acceleration)
 
 void AccelStepper::setSpeed(float speed)
 {
-    if (speed == _speed)
-        return;
+    if (speed == _speed) return;
     speed = constrain(speed, -_maxSpeed, _maxSpeed);
     if (speed == 0.0)
 	_stepInterval = 0;
@@ -320,33 +333,33 @@ void AccelStepper::step(long step)
 {
     switch (_interface)
     {
-        case FUNCTION:
-            step0(step);
-            break;
+    case FUNCTION:
+        step0(step);
+        break;
 
 	case DRIVER:
 	    step1(step);
 	    break;
-    
+
 	case FULL2WIRE:
 	    step2(step);
 	    break;
-    
+
 	case FULL3WIRE:
 	    step3(step);
-	    break;  
+	    break;
 
 	case FULL4WIRE:
 	    step4(step);
-	    break;  
+	    break;
 
 	case HALF3WIRE:
 	    step6(step);
-	    break;  
-		
+	    break;
+
 	case HALF4WIRE:
 	    step8(step);
-	    break;  
+	    break;
     }
 }
 
@@ -356,6 +369,8 @@ void AccelStepper::step(long step)
 // ....
 void AccelStepper::setOutputPins(uint8_t mask)
 {
+    if (! _interface || _interface == NOT_INITIALIZED) return;
+
     uint8_t numpins = 2;
     if (_interface == FULL4WIRE || _interface == HALF4WIRE)
 	numpins = 4;
@@ -386,7 +401,7 @@ void AccelStepper::step1(long step)
     // _pin[0] is step, _pin[1] is direction
     setOutputPins(_direction ? 0b10 : 0b00); // Set direction first else get rogue pulses
     setOutputPins(_direction ? 0b11 : 0b01); // step HIGH
-    // Caution 200ns setup time 
+    // Caution 200ns setup time
     // Delay the minimum allowed pulse width
     delayMicroseconds(_minPulseWidth);
     setOutputPins(_direction ? 0b10 : 0b00); // step LOW
@@ -541,8 +556,8 @@ void AccelStepper::step8(long step)
     
 // Prevents power consumption on the outputs
 void    AccelStepper::disableOutputs()
-{   
-    if (! _interface) return;
+{
+    if (! _interface || _interface == NOT_INITIALIZED) return;
 
     setOutputPins(0); // Handles inversion automatically
     if (_enablePin != 0xff)
@@ -554,8 +569,7 @@ void    AccelStepper::disableOutputs()
 
 void    AccelStepper::enableOutputs()
 {
-    if (! _interface) 
-	return;
+    if (! _interface || _interface == NOT_INITIALIZED) return;
 
     pinMode(_pin[0], OUTPUT);
     pinMode(_pin[1], OUTPUT);
